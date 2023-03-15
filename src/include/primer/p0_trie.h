@@ -388,17 +388,17 @@ class Trie {
         now = now->get()->GetChildNode(i);
       } else {
         *success = false;
-        return T();
+        return {};
       }
     }
     if(!now->get()->IsEndNode()){
       *success = false;
-      return T();
+      return {};
     }
     auto ret = dynamic_cast<TrieNodeWithValue<T>*>(now);
     if(ret == nullptr){
       *success = false;
-      return T();
+      return {};
     }
     *success = true;
     return ret->GetValue();
