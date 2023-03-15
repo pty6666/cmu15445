@@ -25,7 +25,6 @@ template <typename K, typename V>
 ExtendibleHashTable<K, V>::ExtendibleHashTable(size_t bucket_size)
     : global_depth_(0), bucket_size_(bucket_size), num_buckets_(1) {
   dir_.emplace_back(std::make_shared<Bucket>(bucket_size));
-  printf("1\n");
 }
 
 template <typename K, typename V>
@@ -91,12 +90,13 @@ auto ExtendibleHashTable<K, V>::RedistributeBucket(std::shared_ptr<Bucket> bucke
   int dep = bucket->GetDepth();
   std::shared_ptr<Bucket> buc(std::make_shared<Bucket>(bucket_size_, dep));
   size_t pre_index = std::hash<K>()((*bucket->GetItems().begin()).first) & ((1 << (dep - 1)) - 1);
-  for (auto i = bucket->GetItems().begin(); i != bucket->GetItems().end(); i++) {
+  for (auto i = bucket->GetItems().begin(); i != bucket->GetItems().end(); ) {
     size_t index = std::hash<K>()(i->first) & ((1 << dep) - 1);
     if (index != pre_index) {
       buc->Insert(i->first, i->second);
-      bucket->Remove(i->first);
+      bucket->GetItems().erase(i++);
     }
+    else {i++;}
   }
   dir_[pre_index | (1 << (dep - 1))] = buc;
 }
@@ -119,7 +119,6 @@ void ExtendibleHashTable<K, V>::Insert(const K &key, const V &value) {
       for (size_t i = 0; i < siz; i++) {
         dir_.emplace_back(dir_[i]);
       }
-      RedistributeBucket(dir_[index]);
     }
   }
 }
