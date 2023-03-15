@@ -299,7 +299,7 @@ class Trie {
     }
     auto end = now->get()->GetChildNode(key.back());
     if (end == nullptr) {
-      now->get()->InsertChildNode(key.back(), std::make_unique<TrieNodeWithValue>(key.back(), value));
+      now->get()->InsertChildNode(key.back(), std::make_unique<TrieNodeWithValue<T>>(key.back(), value));
       latch_.WUnlock();
       return true;
     }
@@ -307,7 +307,7 @@ class Trie {
       latch_.WUnlock();
       return false;
     }
-    now->get()->InsertChildNode(key.back(), std::make_unique<TrieNodeWithValue>(key.back(), value));
+    now->get()->InsertChildNode(key.back(), std::make_unique<TrieNodeWithValue<T>>(key.back(), value));
     latch_.WUnlock();
     return true;
   }
@@ -395,7 +395,7 @@ class Trie {
       *success = false;
       return {};
     }
-    auto ret = dynamic_cast<TrieNodeWithValue<T>*>(now);
+    auto ret = dynamic_cast<TrieNodeWithValue<T>*>(now->get());
     if(ret == nullptr){
       *success = false;
       return {};
