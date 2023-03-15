@@ -297,17 +297,18 @@ class Trie {
         now = now->get()->GetChildNode(key[i]);
       }
     }
-    auto end = now->get()->GetChildNode(key.back());
-    if (end == nullptr) {
+    if (!now->get()->HasChild(key.back())) {
       now->get()->InsertChildNode(key.back(), std::make_unique<TrieNodeWithValue<T>>(key.back(), value));
       latch_.WUnlock();
       return true;
     }
-    if (now->get()->IsEndNode()) {
+    auto end = now->get()->GetChildNode(key.back());
+    if (end->get()->IsEndNode()) {
       latch_.WUnlock();
       return false;
     }
-    now->get()->InsertChildNode(key.back(), std::make_unique<TrieNodeWithValue<T>>(key.back(), value));
+    auto new_node = new TrieNodeWithValue<T>(std::move(**end),value);
+    end->reset(new_node);
     latch_.WUnlock();
     return true;
   }
@@ -345,9 +346,6 @@ class Trie {
         return false;
       }
     }
-    if (!now->get()->IsEndNode()) {
-      return false;
-    }
     now->get()->SetEndNode(false);
     while (!st.empty()) {
       auto temp = st.top();
@@ -359,6 +357,7 @@ class Trie {
         break;
       }
     }
+    latch_.WUnlock();
     return true;
   }
 
@@ -382,25 +381,31 @@ class Trie {
    */
   template <typename T>
   T GetValue(const std::string &key, bool *success) {
+    latch_.RLock();
+
     auto now = &root_;
     for (auto i : key) {
       if (now->get()->HasChild(i)) {
         now = now->get()->GetChildNode(i);
       } else {
         *success = false;
+        latch_.RUnlock();
         return {};
       }
     }
     if(!now->get()->IsEndNode()){
       *success = false;
+      latch_.RUnlock();
       return {};
     }
     auto ret = dynamic_cast<TrieNodeWithValue<T>*>(now->get());
     if(ret == nullptr){
       *success = false;
+      latch_.RUnlock();
       return {};
     }
     *success = true;
+    latch_.RUnlock();
     return ret->GetValue();
   }
 };
