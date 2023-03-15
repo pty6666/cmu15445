@@ -13,12 +13,12 @@
 #pragma once
 
 #include <memory>
+#include <stack>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <stack>
 
 #include "common/exception.h"
 #include "common/rwlatch.h"
@@ -67,7 +67,7 @@ class TrieNode {
    * @param key_char Key char of child node.
    * @return True if this trie node has a child with given key, false otherwise.
    */
-  bool HasChild(char key_char) const { return children_.find(key_char) != children_.end();}
+  bool HasChild(char key_char) const { return children_.find(key_char) != children_.end(); }
 
   /**
    * TODO(P0): Add implementation
@@ -222,7 +222,7 @@ class TrieNodeWithValue : public TrieNode {
    * @param key_char Key char of this node
    * @param value Value of this node
    */
-  TrieNodeWithValue(char key_char, T value) : TrieNode{key_char},value_{value} { is_end_ = true; }
+  TrieNodeWithValue(char key_char, T value) : TrieNode{key_char}, value_{value} { is_end_ = true; }
 
   /**
    * @brief Destroy the Trie Node With Value object
@@ -307,7 +307,7 @@ class Trie {
       latch_.WUnlock();
       return false;
     }
-    auto new_node = new TrieNodeWithValue<T>(std::move(**end),value);
+    auto new_node = new TrieNodeWithValue<T>(std::move(**end), value);
     end->reset(new_node);
     latch_.WUnlock();
     return true;
@@ -393,13 +393,13 @@ class Trie {
         return {};
       }
     }
-    if(!now->get()->IsEndNode()){
+    if (!now->get()->IsEndNode()) {
       *success = false;
       latch_.RUnlock();
       return {};
     }
-    auto ret = dynamic_cast<TrieNodeWithValue<T>*>(now->get());
-    if(ret == nullptr){
+    auto ret = dynamic_cast<TrieNodeWithValue<T> *>(now->get());
+    if (ret == nullptr) {
       *success = false;
       latch_.RUnlock();
       return {};
