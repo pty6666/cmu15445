@@ -345,10 +345,21 @@ class Trie {
         return false;
       }
     }
-    while(!st.empty()){
-      auto temp = st.top();
-
+    if (!now->get()->IsEndNode()) {
+      return false;
     }
+    now->get()->SetEndNode(false);
+    while (!st.empty()) {
+      auto temp = st.top();
+      st.pop();
+      auto tt = temp.second->get()->GetChildNode(temp.first);
+      if (!tt->get()->HasChildren()) {
+        temp.second->get()->RemoveChildNode(temp.first);
+      } else {
+        break;
+      }
+    }
+    return true;
   }
 
   /**
@@ -371,8 +382,26 @@ class Trie {
    */
   template <typename T>
   T GetValue(const std::string &key, bool *success) {
-    *success = false;
-    return {};
+    auto now = &root_;
+    for (auto i : key) {
+      if (now->get()->HasChild(i)) {
+        now = now->get()->GetChildNode(i);
+      } else {
+        *success = false;
+        return T();
+      }
+    }
+    if(!now->get()->IsEndNode()){
+      *success = false;
+      return T();
+    }
+    auto ret = dynamic_cast<TrieNodeWithValue<T>*>(now);
+    if(ret == nullptr){
+      *success = false;
+      return T();
+    }
+    *success = true;
+    return ret->GetValue();
   }
 };
 }  // namespace bustub
