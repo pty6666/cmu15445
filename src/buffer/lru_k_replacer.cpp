@@ -82,10 +82,10 @@ void LRUKReplacer::SetEvictable(frame_id_t frame_id, bool set_evictable) {
 void LRUKReplacer::Remove(frame_id_t frame_id) {
   std::lock_guard<std::mutex> lock(latch_);
   auto temp = mp_.find(frame_id);
-  if(temp == mp_.end()){
+  if (temp == mp_.end()) {
     return;
   }
-  if(!temp->second.evictable_) {
+  if (!temp->second.evictable_) {
     return;
   }
   mp_.erase(temp);

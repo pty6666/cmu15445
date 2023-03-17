@@ -54,7 +54,7 @@ class LRUKReplacer {
    */
   ~LRUKReplacer() = default;
 
-  auto Judge(frame_id_t f1,frame_id_t f2) -> frame_id_t;
+  auto Judge(frame_id_t f1, frame_id_t f2) -> frame_id_t;
 
   /**
    * TODO(P1): Add implementation
@@ -141,11 +141,11 @@ class LRUKReplacer {
   size_t curr_size_{0};
   size_t replacer_size_;
   size_t k_;
-  struct Frame{
+  struct Frame {
     bool evictable_{false};
     std::list<int> list_;
   };
-  std::unordered_map<frame_id_t,Frame> mp_;
+  std::unordered_map<frame_id_t, Frame> mp_;
   std::mutex latch_;
 };
 

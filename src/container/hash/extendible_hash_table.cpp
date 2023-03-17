@@ -88,17 +88,23 @@ template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::RedistributeBucket(std::shared_ptr<Bucket> bucket) -> void {
   bucket->IncrementDepth();
   int dep = bucket->GetDepth();
+  num_buckets_++;
   std::shared_ptr<Bucket> buc(std::make_shared<Bucket>(bucket_size_, dep));
   size_t pre_index = std::hash<K>()((*bucket->GetItems().begin()).first) & ((1 << (dep - 1)) - 1);
-  for (auto i = bucket->GetItems().begin(); i != bucket->GetItems().end(); ) {
+  for (auto i = bucket->GetItems().begin(); i != bucket->GetItems().end();) {
     size_t index = std::hash<K>()(i->first) & ((1 << dep) - 1);
     if (index != pre_index) {
       buc->Insert(i->first, i->second);
       bucket->GetItems().erase(i++);
+    } else {
+      i++;
     }
-    else {i++;}
   }
-  dir_[pre_index | (1 << (dep - 1))] = buc;
+  for (size_t i = 0; i < dir_.size(); i++) {
+    if ((i & ((1 << (dep - 1)) - 1)) == pre_index && (i & ((1 << dep) - 1)) != pre_index) {
+      dir_[i] = buc;
+    }
+  }
 }
 
 template <typename K, typename V>
