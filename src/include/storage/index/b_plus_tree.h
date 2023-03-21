@@ -23,6 +23,7 @@ namespace bustub {
 
 #define BPLUSTREE_TYPE BPlusTree<KeyType, ValueType, KeyComparator>
 
+enum class OPERATION{READ,WRITE,UPDATE};
 /**
  * Main class providing the API for the Interactive B+ Tree.
  *
@@ -81,6 +82,8 @@ class BPlusTree {
   void ToGraph(BPlusTreePage *page, BufferPoolManager *bpm, std::ofstream &out) const;
 
   void ToString(BPlusTreePage *page, BufferPoolManager *bpm) const;
+
+  auto GetLeaf(const KeyType& key, ) -> page_id_t;
 
   // member variable
   std::string index_name_;

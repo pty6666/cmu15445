@@ -21,7 +21,7 @@ BPLUSTREE_TYPE::BPlusTree(std::string name, BufferPoolManager *buffer_pool_manag
  * Helper function to decide whether current b+tree is empty
  */
 INDEX_TEMPLATE_ARGUMENTS
-auto BPLUSTREE_TYPE::IsEmpty() const -> bool { return true; }
+auto BPLUSTREE_TYPE::IsEmpty() const -> bool { return root_page_id_ == INVALID_PAGE_ID; }
 /*****************************************************************************
  * SEARCH
  *****************************************************************************/
@@ -32,7 +32,15 @@ auto BPLUSTREE_TYPE::IsEmpty() const -> bool { return true; }
  */
 INDEX_TEMPLATE_ARGUMENTS
 auto BPLUSTREE_TYPE::GetValue(const KeyType &key, std::vector<ValueType> *result, Transaction *transaction) -> bool {
-  return false;
+  if(IsEmpty()) {
+    return false;
+  }
+  auto
+
+}
+INDEX_TEMPLATE_ARGUMENTS
+auto BPLUSTREE_TYPE::GetLeaf(const KeyType& key,OPERATION operation,Transaction *transaction  ) -> page_id_t {
+
 }
 
 /*****************************************************************************
