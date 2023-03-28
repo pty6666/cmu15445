@@ -53,6 +53,12 @@ class BPlusTreeLeafPage : public BPlusTreePage {
 
   auto KeyIndex(const KeyType& key, const KeyComparator& comparator) const -> size_t;
   auto Insert(const KeyType& key,const ValueType& value, const KeyComparator& comparator) -> size_t;
+  auto LookUp(const KeyType& key,ValueType* value, const KeyComparator& comparator) -> bool;
+  void CopyNFrom(const MappingType* from, size_t size);
+  void MoveHalfTo(BPlusTreeLeafPage *to);
+
+  auto RemoveAndDeleteRecord(const KeyType& key,const KeyComparator& comparator) -> int;
+
  private:
   page_id_t next_page_id_;
   // Flexible array member for page data.

@@ -59,7 +59,7 @@ INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_LEAF_PAGE_TYPE::GetItem(size_t idx) -> const std::pair<KeyType, ValueType> & { return array_[idx]; }
 
 INDEX_TEMPLATE_ARGUMENTS
-auto B_PLUS_TREE_LEAF_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyComparator& comparator) const -> size_t {
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyComparator &comparator) const -> size_t {
   auto idx = std::lower_bound(
       array_, array_ + GetSize(), key,
       [&comparator](const MappingType &pair, const KeyType &key) { return comparator(pair.first, key) < 0; });
@@ -67,8 +67,59 @@ auto B_PLUS_TREE_LEAF_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyComparato
 }
 
 INDEX_TEMPLATE_ARGUMENTS
-auto B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(const KeyType &key, const ValueType &value, const KeyComparator &comparator) -> size_t {
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(const KeyType &key, const ValueType &value, const KeyComparator &comparator)
+    -> size_t {
+  int idx = KeyIndex(key, comparator);
+  if (idx == GetSize()) {
+    array_[idx] = {key, value};
+    IncreaseSize(1);
+    return GetSize();
+  }
+  if (comparator(array_[idx].first, key) == 0) {
+    return GetSize();
+  }
+  std::move_backward(array_ + idx, array_ + GetSize(), array_ + GetSize() + 1);
+  array_[idx] = {key, value};
+  IncreaseSize(1);
+  return GetSize();
+}
 
+INDEX_TEMPLATE_ARGUMENTS
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::LookUp(const KeyType &key, ValueType *value, const KeyComparator &comparator) -> bool {
+  int idx = KeyIndex(key, comparator);
+  if (idx == GetSize()) {
+    return false;
+  }
+  if (!comparator(array_[idx].first, key)) {
+    return false;
+  }
+  *value = array_[idx].second;
+  return true;
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyNFrom(const std::pair<KeyType, ValueType> *from, size_t size) {
+  std::copy(from, from + size, array_ + GetSize());
+  IncreaseSize(size);
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveHalfTo(bustub::BPlusTreeLeafPage<KeyType, ValueType, KeyComparator> *to) {
+  size_t begin_size = GetMinSize();
+  size_t end_size = GetMaxSize();
+  to->CopyNFrom(array_ + begin_size,end_size - begin_size);
+  SetSize(begin_size);
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::RemoveAndDeleteRecord(const KeyType &key, const KeyComparator &comparator) -> int {
+  int idx = KeyIndex(key, comparator);
+  if (idx == GetSize() || !comparator(array_[idx].first, key)) {
+    return GetSize();
+  }
+  std::move(array_ + idx + 1, array_ + GetSize(), array_ + idx);
+  IncreaseSize(-1);
+  return GetSize();
 }
 
 template class BPlusTreeLeafPage<GenericKey<4>, RID, GenericComparator<4>>;
