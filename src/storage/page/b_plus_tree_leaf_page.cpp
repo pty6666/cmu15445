@@ -122,6 +122,39 @@ auto B_PLUS_TREE_LEAF_PAGE_TYPE::RemoveAndDeleteRecord(const KeyType &key, const
   return GetSize();
 }
 
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveAllTo(BPlusTreeLeafPage<KeyType, ValueType, KeyComparator> *to) {
+  to->CopyNFrom(array_,GetSize());
+  to->SetNextPageId(GetNextPageId());
+  SetSize(0);
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveFirstToEndOf(BPlusTreeLeafPage<KeyType, ValueType, KeyComparator> *to) {
+  to->CopyLastFrom(array_[0]);
+  std::move(array_ + 1, array_ + GetSize(), array_);
+  IncreaseSize(-1);
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyLastFrom(const std::pair<KeyType, ValueType> &from) {
+  array_[GetSize()] = from;
+  IncreaseSize(1);
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveLastToFrontOf(bustub::BPlusTreeLeafPage<KeyType, ValueType, KeyComparator> *to) {
+  to->CopyFirstFrom(array_[GetSize() - 1]);
+  IncreaseSize(-1);
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyFirstFrom(const std::pair<KeyType, ValueType> &from) {
+  std::move_backward(array_,array_ + GetSize(),array_ + GetSize() + 1);
+  array_[0] = from;
+  IncreaseSize(1);
+}
+
 template class BPlusTreeLeafPage<GenericKey<4>, RID, GenericComparator<4>>;
 template class BPlusTreeLeafPage<GenericKey<8>, RID, GenericComparator<8>>;
 template class BPlusTreeLeafPage<GenericKey<16>, RID, GenericComparator<16>>;

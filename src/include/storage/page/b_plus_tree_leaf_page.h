@@ -58,7 +58,11 @@ class BPlusTreeLeafPage : public BPlusTreePage {
   void MoveHalfTo(BPlusTreeLeafPage *to);
 
   auto RemoveAndDeleteRecord(const KeyType& key,const KeyComparator& comparator) -> int;
-
+  void MoveAllTo(BPlusTreeLeafPage* to);
+  void MoveFirstToEndOf(BPlusTreeLeafPage* to);
+  void CopyLastFrom(const MappingType& from);
+  void MoveLastToFrontOf(BPlusTreeLeafPage* to);
+  void CopyFirstFrom(const MappingType& from);
  private:
   page_id_t next_page_id_;
   // Flexible array member for page data.
