@@ -44,22 +44,23 @@ class BPlusTreeInternalPage : public BPlusTreePage {
   void SetValueAt(int index, const ValueType &value);
   auto ValueIndex(const ValueType &value) const -> int;
 
-  auto LookUp(const KeyType & key, const KeyComparator& comparator) const -> ValueType;
-  void PopulateNewRoot(const ValueType& old_value, const KeyType &key, const ValueType& new_value );
-  void InsertNodeAfterIndex(const size_t& idx,const KeyType& new_key,const ValueType& new_value);
-  void MoveHalfTo(BPlusTreeInternalPage* to, BufferPoolManager* buffer_pool);
-  void CopyNFrom(const MappingType* from,size_t size,BufferPoolManager* buffer_pool);
+  auto LookUp(const KeyType &key, const KeyComparator &comparator) const -> ValueType;
+  void PopulateNewRoot(const ValueType &old_value, const KeyType &key, const ValueType &new_value);
+  auto InsertNodeAfter(const ValueType &old_value, const KeyType &new_key, const ValueType &new_value) -> int;
+  void MoveHalfTo(BPlusTreeInternalPage *to, BufferPoolManager *buffer_pool);
 
-  void Remove(const size_t& idx);
-  auto RemoveAndReturnOnlyChild(const size_t& idx) -> ValueType;
-  void MoveAllTo(BPlusTreeInternalPage* to, const KeyType& mid_key, BufferPoolManager* buffer_pool);
-  void MoveFirstToBackOf(BPlusTreeInternalPage* to, const KeyType& mid_key, BufferPoolManager* buffer_pool);
-  void MoveLastToFrontOf(BPlusTreeInternalPage* to, const KeyType& mid_key, BufferPoolManager* buffer_pool);
-  void CopyLastFrom(const MappingType& from, BufferPoolManager* buffer_pool);
-  void CopyFirstFrom(const MappingType& from, BufferPoolManager* buffer_pool);
+  void Remove(int idx);
+  auto RemoveAndReturnOnlyChild() -> ValueType;
+  void MoveAllTo(BPlusTreeInternalPage *to, const KeyType &mid_key, BufferPoolManager *buffer_pool);
+  void MoveFirstToEndOf(BPlusTreeInternalPage *to, const KeyType &mid_key, BufferPoolManager *buffer_pool);
+  void MoveLastToFrontOf(BPlusTreeInternalPage *to, const KeyType &mid_key, BufferPoolManager *buffer_pool);
 
  private:
   // Flexible array member for page data.
   MappingType array_[1];
+
+  void CopyLastFrom(const MappingType &from, BufferPoolManager *buffer_pool);
+  void CopyFirstFrom(const MappingType &from, BufferPoolManager *buffer_pool);
+  void CopyNFrom(const MappingType *from, size_t size, BufferPoolManager *buffer_pool);
 };
 }  // namespace bustub

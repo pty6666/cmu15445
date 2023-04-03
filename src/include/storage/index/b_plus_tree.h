@@ -75,8 +75,8 @@ class BPlusTree {
   // read data from file and remove one by one
   void RemoveFromFile(const std::string &file_name, Transaction *transaction = nullptr);
 
-  auto FindLeaf(const KeyType& key,OPERATION operation,Transaction* transaction,bool leftMost = false,bool rightMost = false) ->
-      Page*;
+  auto FindLeaf(const KeyType &key, OPERATION operation, Transaction *transaction = nullptr, bool leftMost = false,
+                bool rightMost = false) -> Page *;
 
   void ReleaseLatchFromQueue(Transaction *transaction);
 
@@ -88,13 +88,24 @@ class BPlusTree {
 
   void ToString(BPlusTreePage *page, BufferPoolManager *bpm) const;
 
-  void StartNewTree(const KeyType& key,const ValueType& value);
+  void StartNewTree(const KeyType &key, const ValueType &value);
 
-  auto InsertIntoLeaf(const KeyType& key, const ValueType& value, Transaction* transaction = nullptr) -> bool;
-  void InsertIntoParent(BPlusTreePage* old_node,const KeyType& key, BPlusTreePage* new_node,Transaction* transaction = nullptr);
+  auto InsertIntoLeaf(const KeyType &key, const ValueType &value, Transaction *transaction = nullptr) -> bool;
+  void InsertIntoParent(BPlusTreePage *old_node, const KeyType &key, BPlusTreePage *new_node,
+                        Transaction *transaction = nullptr);
+  auto AdjustRoot(BPlusTreePage *old_root_node) -> bool;
 
   template <typename T>
-  auto Split(T* node) -> T*;
+  auto Split(T *node) -> T *;
+
+  template <typename T>
+  auto CoalesceOrRedistribute(T *node, Transaction *transaction = nullptr) -> bool;
+
+  template <typename T>
+  auto Coalesce(T *neighbor_node, T *node, InternalPage *parent, int index, Transaction *transaction = nullptr) -> bool;
+
+  template <typename T>
+  void Redistribute(T *neighbor_node, T *node, InternalPage *parent, int index, bool from_prev);
 
   // member variable
   std::string index_name_;
